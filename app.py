@@ -3,18 +3,11 @@ import pickle
 import streamlit as st
 
 # Set page configuration with a heart icon
-st.set_page_config(page_title="Heart Disease Prediction",
-                   layout="wide",
-                   page_icon="❤️")
+st.set_page_config(page_title="Heart Disease Prediction", layout="wide", page_icon="❤️")
 
 # Get the absolute path of the directory where 'app.py' is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Construct the relative path to your model file from the base directory
 model_path = os.path.join(BASE_DIR, 'model', 'heart_disease_model.sav')
-
-# Print the model path to debug
-print(f"Model path: {model_path}")
 
 # Load the model
 try:
@@ -23,21 +16,10 @@ try:
     print("Model loaded successfully.")
 except FileNotFoundError as e:
     print(f"Error: {e}")
-    
-# Getting the working directory of the main.py
-##working_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Loading the saved heart disease model
-#heart_disease_model = pickle.load(open('model/heart_disease_model.sav', 'rb'))
-
-# Sidebar
+# Sidebar Navigation
 st.sidebar.title("Navigation")
-selected = st.sidebar.radio(
-    "Choose a section:", 
-    ["Home", 
-     "Heart Disease Prediction", 
-     "About Us"]
-)
+selected = st.sidebar.radio("Choose a section:", ["Home", "Heart Disease Prediction", "About Us"])
 
 # Home Section
 if selected == 'Home':
@@ -55,7 +37,7 @@ if selected == 'Heart Disease Prediction':
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        age = st.text_input('Age')
+        age = st.number_input('Age', min_value=0)  # Use number_input for numeric input
 
     with col2:
         sex = st.selectbox('Sex', options=['Female', 'Male'])
@@ -65,10 +47,10 @@ if selected == 'Heart Disease Prediction':
                                                        'Non-Anginal Pain', 'Asymptomatic'])
 
     with col1:
-        trestbps = st.text_input('Resting Blood Pressure (in mm Hg)')
+        trestbps = st.number_input('Resting Blood Pressure (in mm Hg)', min_value=0)  # Use number_input
 
     with col2:
-        chol = st.text_input('Serum Cholestoral (in mg/dl)')
+        chol = st.number_input('Serum Cholestoral (in mg/dl)', min_value=0)  # Use number_input
 
     with col3:
         fbs = st.selectbox('Fasting Blood Sugar > 120 mg/dl', options=['False', 'True'])
@@ -77,88 +59,52 @@ if selected == 'Heart Disease Prediction':
         restecg = st.selectbox('Resting Electrocardiographic Results', options=['Normal', 'lv hypertrophy', 'st-t abnormality'])
 
     with col2:
-        thalach = st.text_input('Maximum Heart Rate Achieved')
+        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0)  # Use number_input
 
     with col3:
         exang = st.selectbox('Exercise Induced Angina', options=['False', 'True'])
 
     with col1:
-        oldpeak = st.text_input('ST Depression Induced by Exercise')
+        oldpeak = st.number_input('ST Depression Induced by Exercise', min_value=0.0)  # Use number_input
 
     with col2:
         slope = st.selectbox('Slope of the Peak Exercise ST Segment', options=['Upsloping', 'Flat', 'Downsloping'])
 
     with col3:
-        ca = st.text_input('Major Vessels Colored by Flourosopy (0-3)')
+        ca = st.number_input('Major Vessels Colored by Flourosopy (0-3)', min_value=0)  # Use number_input
 
     with col1:
         thal = st.selectbox('Thalassemia', options=['Normal', 'Fixed Defect', 'Reversible Defect'])
 
-    heart_diagnosis = ''
-
-    # Custom CSS for the button
-    st.markdown("""
-        <style>
-        .custom-button {
-            background-color: red !important;
-            color: white !important;
-            border: none !important;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .stButton > button {
-            background-color: red !important;
-            color: white !important;
-            border: none !important;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # Creating a button for Prediction
-'''    if st.button('Heart Disease Test Result', key='custom_button'):
-        user_input = [age, int(sex.split('-')[0].strip()), int(cp.split('-')[0].strip()), 
-                      trestbps, chol, int(fbs.split('-')[0].strip()), 
-                      int(restecg.split('-')[0].strip()), thalach, int(exang.split('-')[0].strip()), 
-                      oldpeak, int(slope.split('-')[0].strip()), ca, int(thal.split('-')[0].strip())]
-
-        user_input = [float(x) if isinstance(x, (int, float)) else x for x in user_input]
+    # Button for Prediction
+    if st.button('Heart Disease Test Result'):
+        user_input = [
+            float(age),
+            1 if sex == 'Male' else 0,  # Convert sex to binary
+            cp.index(cp),  # Convert cp to numeric
+            float(trestbps),
+            float(chol),
+            1 if fbs == 'True' else 0,  # Convert fbs to binary
+            restecg.index(restecg),  # Convert restecg to numeric
+            float(thalach),
+            1 if exang == 'True' else 0,  # Convert exang to binary
+            float(oldpeak),
+            slope.index(slope),  # Convert slope to numeric
+            float(ca),
+            thal.index(thal)  # Convert thal to numeric
+        ]
         
+        # Make prediction
         heart_prediction = heart_disease_model.predict([user_input])
-
+        
+        # Diagnosis message based on prediction
         if heart_prediction[0] == 1:
             heart_diagnosis = '<span style="color:red; font-size:24px; font-weight:bold;">❤️ The person is at risk of heart disease. ❤️</span>'
         else:
             heart_diagnosis = '<span style="color:green; font-size:24px; font-weight:bold;">💚 The person is not at risk of heart disease. 💚</span>'
-
-    st.markdown(heart_diagnosis, unsafe_allow_html=True)'''
-    
-    
-# Creating a button for Prediction
-if st.button('Heart Disease Test Result'):
-    user_input = [age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]
-    
-    # Convert user input to float
-    user_input = [float(x) for x in user_input]
-
-    # Make prediction
-    heart_prediction = heart_disease_model.predict([user_input])
-
-    # Diagnosis message based on prediction
-    if heart_prediction[0] == 1:
-        heart_diagnosis = '<span style="color:red; font-size:24px; font-weight:bold;">❤️ The person is at risk of heart disease. ❤️</span>'
-    else:
-        heart_diagnosis = '<span style="color:green; font-size:24px; font-weight:bold;">💚 The person is not at risk of heart disease. 💚</span>'
-
-    # Display the result
-    st.success(heart_diagnosis)
-
-
+        
+        # Display the result
+        st.markdown(heart_diagnosis, unsafe_allow_html=True)
 
 # About Us Section
 if selected == 'About Us':
