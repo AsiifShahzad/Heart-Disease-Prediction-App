@@ -121,7 +121,7 @@ if selected == 'Heart Disease Prediction':
     """, unsafe_allow_html=True)
 
     # Creating a button for Prediction
-    if st.button('Heart Disease Test Result', key='custom_button'):
+'''    if st.button('Heart Disease Test Result', key='custom_button'):
         user_input = [age, int(sex.split('-')[0].strip()), int(cp.split('-')[0].strip()), 
                       trestbps, chol, int(fbs.split('-')[0].strip()), 
                       int(restecg.split('-')[0].strip()), thalach, int(exang.split('-')[0].strip()), 
@@ -136,7 +136,29 @@ if selected == 'Heart Disease Prediction':
         else:
             heart_diagnosis = '<span style="color:green; font-size:24px; font-weight:bold;">💚 The person is not at risk of heart disease. 💚</span>'
 
-    st.markdown(heart_diagnosis, unsafe_allow_html=True)
+    st.markdown(heart_diagnosis, unsafe_allow_html=True)'''
+    
+    
+# Creating a button for Prediction
+if st.button('Heart Disease Test Result'):
+    user_input = [age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]
+    
+    # Convert user input to float
+    user_input = [float(x) for x in user_input]
+
+    # Make prediction
+    heart_prediction = heart_disease_model.predict([user_input])
+
+    # Diagnosis message based on prediction
+    if heart_prediction[0] == 1:
+        heart_diagnosis = '<span style="color:red; font-size:24px; font-weight:bold;">❤️ The person is at risk of heart disease. ❤️</span>'
+    else:
+        heart_diagnosis = '<span style="color:green; font-size:24px; font-weight:bold;">💚 The person is not at risk of heart disease. 💚</span>'
+
+    # Display the result
+    st.success(heart_diagnosis)
+
+
 
 # About Us Section
 if selected == 'About Us':
