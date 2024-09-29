@@ -9,13 +9,21 @@ st.set_page_config(page_title="Heart Disease Prediction", layout="wide", page_ic
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, 'model', 'heart_disease_model.sav')
 
-# Load the model
-try:
-    with open(model_path, 'rb') as model_file:
-        heart_disease_model = pickle.load(model_file)
-    print("Model loaded successfully.")
-except FileNotFoundError as e:
-    print(f"Error: {e}")
+# Load the model with caching
+@st.cache_resource
+def load_model():
+    try:
+        with open(model_path, 'rb') as model_file:
+            return pickle.load(model_file)
+    except FileNotFoundError as e:
+        st.error(f"Model file not found: {e}")
+        return None
+
+heart_disease_model = load_model()
+
+# Check if the model loaded successfully
+if heart_disease_model is None:
+    st.error("Failed to load the heart disease model. Please check the model file.")
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
@@ -93,16 +101,16 @@ if selected == 'Heart Disease Prediction':
             float(ca),
             thal.index(thal)  # Convert thal to numeric
         ]
-        
+
         # Make prediction
         heart_prediction = heart_disease_model.predict([user_input])
-        
+
         # Diagnosis message based on prediction
         if heart_prediction[0] == 1:
             heart_diagnosis = '<span style="color:red; font-size:24px; font-weight:bold;">❤️ The person is at risk of heart disease. ❤️</span>'
         else:
             heart_diagnosis = '<span style="color:green; font-size:24px; font-weight:bold;">💚 The person is not at risk of heart disease. 💚</span>'
-        
+
         # Display the result
         st.markdown(heart_diagnosis, unsafe_allow_html=True)
 
